@@ -33,6 +33,7 @@ import static org.usfirst.frc.team3925.robot.RobotMap.LATCH_SOLENOID_B;
 import static org.usfirst.frc.team3925.robot.RobotMap.PCM_CAN_ID;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -42,6 +43,8 @@ import edu.wpi.first.wpilibj.Joystick;
  * directory.
  */
 public class Robot extends IterativeRobot {
+	
+	int wait = 0;
 	
 	Camera camera;
 	Drive drive;
@@ -62,9 +65,9 @@ public class Robot extends IterativeRobot {
     public void robotInit() {
     	camera = new Camera(CAMERA_IP);
     	drive = new Drive(DRIVE_LEFT_MOTOR, DRIVE_RIGHT_MOTOR, PCM_CAN_ID, DRIVE_SOLENOID_A, DRIVE_SOLENOID_B);
-    	elevator = new Elevator(ELEVATOR_LEFT_VICTOR, ELEVATOR_RIGHT_VICTOR, ELEVATOR_ENCODER_A, ELEVATOR_ENCODER_B, ELEVATOR_SWITCH);
-    	intake = new Intake(INTAKE_VICTOR_LEFT, INTAKE_VICTOR_RIGHT, INTAKE_ROLLER);
     	latches = new Latches(PCM_CAN_ID, LATCH_SOLENOID_A, LATCH_SOLENOID_B);
+    	elevator = new Elevator(ELEVATOR_LEFT_VICTOR, ELEVATOR_RIGHT_VICTOR, ELEVATOR_ENCODER_A, ELEVATOR_ENCODER_B, ELEVATOR_SWITCH, latches);
+    	intake = new Intake(INTAKE_VICTOR_LEFT, INTAKE_VICTOR_RIGHT, INTAKE_ROLLER);
     	
     	driverXbox = new Joystick(JOYSTICK_XBOX_DRIVER);
     	gearToggle = new ToggleButton(driverXbox, 1);
@@ -87,6 +90,7 @@ public class Robot extends IterativeRobot {
      */
     public void teleopInit() {
     	gearToggle.reset();
+    	elevator.zeroHeightEncoder();
     }
 
     /**
@@ -95,21 +99,47 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic() {
     	
     	drivePeriodic();
+		SmartDashboard.putNumber("elevator height", elevator.getCurrentHeight());
     	elevatorPeriodic();
-    	
-    	if (driverXbox.getRawButton(2)) {
-    		driverXbox.setRumble(Joystick.RumbleType.kLeftRumble, 1);
-    	}else {
-    		driverXbox.setRumble(Joystick.RumbleType.kLeftRumble, 0);
-    	}
+    	rumble();
+    	intakePeriodic();
     	
     }
 
 	private void elevatorPeriodic() {
-		double elevatorSpeed = driverXbox.getRawAxis(2) - driverXbox.getRawAxis(3);
-    	elevator.setElevatorSpeed(elevatorSpeed);
+		//Setting the speed of the elevator
+		double elevatorSpeed = driverXbox.getRawAxis(3) - driverXbox.getRawAxis(2);
+		if (elevatorSpeed != 0) {
+	    	elevator.setElevatorSpeed(elevatorSpeed);
+		}else {
+			//Setting the height of the elevator
+			//double elevatorHeight = driverXbox.getRawAxis(2);
+			//elevator.updateHeight(elevatorHeight);
+			
+			if (driverXbox.getRawButton(3) && wait > 30) {
+				elevator.liftStack();
+				wait = 0;
+			}
+			
+			if (driverXbox.getRawButton(4) && wait > 30) {
+				elevator.lowerStack();
+				wait = 0;
+			}
+			elevator.elevatorRun();
+		}
+		wait = wait + 1;
 	}
-
+	
+	private void intakePeriodic() {
+		double intakeSpeed = 0;
+		if (driverXbox.getRawButton(5))
+			intakeSpeed = intakeSpeed + 1;
+		if (driverXbox.getRawButton(6))
+			intakeSpeed = intakeSpeed - 1;
+		
+		intake.setSpeed(intakeSpeed);
+	}
+	
 	private void drivePeriodic() {
 		double moveValue = driverXbox.getRawAxis(1);
     	double rotateValue = driverXbox.getRawAxis(4);
@@ -123,6 +153,16 @@ public class Robot extends IterativeRobot {
     	boolean gear = gearToggle.get();
     	
 		drive.drive(moveValue, rotateValue, gear);
+	}
+	
+	private void rumble() {
+		if (driverXbox.getRawButton(2)) {
+			driverXbox.setRumble(Joystick.RumbleType.kLeftRumble, 1);
+			driverXbox.setRumble(Joystick.RumbleType.kRightRumble, 1);
+		}else {
+			driverXbox.setRumble(Joystick.RumbleType.kLeftRumble, 0);
+			driverXbox.setRumble(Joystick.RumbleType.kRightRumble, 0);
+		}
 	}
     
     @Override
