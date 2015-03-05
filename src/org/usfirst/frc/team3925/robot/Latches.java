@@ -1,17 +1,17 @@
 package org.usfirst.frc.team3925.robot;
 
-import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.Relay;
 
 public class Latches {
 	
-	DoubleSolenoid latches;
+	Relay latches;
 	
-	public Latches(int pcmcanid, int forwardsolenoidport, int reversesolenoidport) {
-		latches = new DoubleSolenoid(pcmcanid, forwardsolenoidport, reversesolenoidport);
+	public Latches(int latchesport) {
+		latches = new Relay(latchesport);
 	}
 	
 	public void setLatches(boolean out) {
-		latches.set(out ? DoubleSolenoid.Value.kForward : DoubleSolenoid.Value.kReverse);
+		latches.set(out ? Relay.Value.kForward : Relay.Value.kOff);
 	}
 	
 }

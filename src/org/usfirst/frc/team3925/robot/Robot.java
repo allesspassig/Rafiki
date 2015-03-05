@@ -28,8 +28,7 @@ import static org.usfirst.frc.team3925.robot.RobotMap.INTAKE_VICTOR_LEFT;
 import static org.usfirst.frc.team3925.robot.RobotMap.INTAKE_VICTOR_RIGHT;
 import static org.usfirst.frc.team3925.robot.RobotMap.JOYSTICK_XBOX_DRIVER;
 import static org.usfirst.frc.team3925.robot.RobotMap.JOYSTICK_XBOX_SHOOTER;
-import static org.usfirst.frc.team3925.robot.RobotMap.LATCH_SOLENOID_A;
-import static org.usfirst.frc.team3925.robot.RobotMap.LATCH_SOLENOID_B;
+import static org.usfirst.frc.team3925.robot.RobotMap.LATCH_PORT;
 import static org.usfirst.frc.team3925.robot.RobotMap.PCM_CAN_ID;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
@@ -57,6 +56,8 @@ public class Robot extends IterativeRobot {
 	ToggleButton gearToggle;
 	
 	private final double DEADZONE = 0.1;
+	double leftDistanceDriven;
+	double rightDistanceDriven;
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -65,32 +66,37 @@ public class Robot extends IterativeRobot {
     public void robotInit() {
     	camera = new Camera(CAMERA_IP);
     	drive = new Drive(DRIVE_LEFT_MOTOR, DRIVE_RIGHT_MOTOR, PCM_CAN_ID, DRIVE_SOLENOID_A, DRIVE_SOLENOID_B);
-    	latches = new Latches(PCM_CAN_ID, LATCH_SOLENOID_A, LATCH_SOLENOID_B);
+    	latches = new Latches(LATCH_PORT);
     	elevator = new Elevator(ELEVATOR_LEFT_VICTOR, ELEVATOR_RIGHT_VICTOR, ELEVATOR_ENCODER_A, ELEVATOR_ENCODER_B, ELEVATOR_SWITCH, latches);
     	intake = new Intake(INTAKE_VICTOR_LEFT, INTAKE_VICTOR_RIGHT, INTAKE_ROLLER);
     	
     	driverXbox = new Joystick(JOYSTICK_XBOX_DRIVER);
     	gearToggle = new ToggleButton(driverXbox, 1);
     	shooterXbox = new Joystick(JOYSTICK_XBOX_SHOOTER);
+    	
+    	leftDistanceDriven = 0;
+    	rightDistanceDriven = 0;
     }
 
     public void autonomousInit() {
-    	
+    	latches.setLatches(false);
+    	elevator.zeroElevator();
+    	gearToggle.reset();
     }
     
     /**
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-
+    	drive.drive(1, 0, true);
     }
     
     /**
      * This function is called at the beginning of teleop
      */
     public void teleopInit() {
+    	elevator.zeroElevator();
     	gearToggle.reset();
-    	elevator.zeroHeightEncoder();
     }
 
     /**
@@ -108,8 +114,8 @@ public class Robot extends IterativeRobot {
 
 	private void elevatorPeriodic() {
 		//Setting the speed of the elevator
-		double elevatorSpeed = driverXbox.getRawAxis(3) - driverXbox.getRawAxis(2);
-		if (elevatorSpeed != 0) {
+		double elevatorSpeed = driverXbox.getRawAxis(2) - driverXbox.getRawAxis(3);
+		if (elevatorSpeed != 0 && driverXbox.getRawButton(1)) {
 	    	elevator.setElevatorSpeed(elevatorSpeed);
 		}else {
 			//Setting the height of the elevator
@@ -127,7 +133,7 @@ public class Robot extends IterativeRobot {
 			}
 			elevator.elevatorRun();
 		}
-		wait = wait + 1;
+		wait++;
 	}
 	
 	private void intakePeriodic() {
