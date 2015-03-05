@@ -1,3 +1,5 @@
+//THIS WHOLE CLASS WAS RENDERED USELESS WITH NEW DESIGN WITHOUT LATCHES
+
 package org.usfirst.frc.team3925.robot;
 
 import edu.wpi.first.wpilibj.Relay;
