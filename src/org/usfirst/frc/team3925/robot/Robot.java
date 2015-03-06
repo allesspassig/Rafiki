@@ -15,6 +15,10 @@ package org.usfirst.frc.team3925.robot;
 
 import static org.usfirst.frc.team3925.robot.RobotMap.CAMERA_IP;
 import static org.usfirst.frc.team3925.robot.RobotMap.DRIVE_LEFT_MOTOR;
+import static org.usfirst.frc.team3925.robot.RobotMap.LEFT_DRIVE_ENCODER_A;
+import static org.usfirst.frc.team3925.robot.RobotMap.LEFT_DRIVE_ENCODER_B;
+import static org.usfirst.frc.team3925.robot.RobotMap.RIGHT_DRIVE_ENCODER_A;
+import static org.usfirst.frc.team3925.robot.RobotMap.RIGHT_DRIVE_ENCODER_B;
 import static org.usfirst.frc.team3925.robot.RobotMap.DRIVE_RIGHT_MOTOR;
 import static org.usfirst.frc.team3925.robot.RobotMap.DRIVE_SOLENOID_A;
 import static org.usfirst.frc.team3925.robot.RobotMap.DRIVE_SOLENOID_B;
@@ -45,6 +49,8 @@ public class Robot extends IterativeRobot {
 	
 	int wait = 0;
 	
+	public static final double AUTONOMOUS_DISTANCE = 10;
+	
 	Camera camera;
 	Drive drive;
 	Elevator elevator;
@@ -66,7 +72,7 @@ public class Robot extends IterativeRobot {
      */
     public void robotInit() {
     	camera = new Camera(CAMERA_IP);
-    	drive = new Drive(DRIVE_LEFT_MOTOR, DRIVE_RIGHT_MOTOR, PCM_CAN_ID, DRIVE_SOLENOID_A, DRIVE_SOLENOID_B);
+    	drive = new Drive(DRIVE_LEFT_MOTOR, DRIVE_RIGHT_MOTOR, PCM_CAN_ID, DRIVE_SOLENOID_A, DRIVE_SOLENOID_B, LEFT_DRIVE_ENCODER_A, LEFT_DRIVE_ENCODER_B, RIGHT_DRIVE_ENCODER_A, RIGHT_DRIVE_ENCODER_B);
     	latches = new Latches(LATCH_PORT);
     	elevator = new Elevator(ELEVATOR_LEFT_VICTOR, ELEVATOR_RIGHT_VICTOR, ELEVATOR_ENCODER_A, ELEVATOR_ENCODER_B, ELEVATOR_SWITCH, latches);
     	intake = new Intake(INTAKE_VICTOR_LEFT, INTAKE_VICTOR_RIGHT, INTAKE_ROLLER);
@@ -83,13 +89,19 @@ public class Robot extends IterativeRobot {
     	latches.setLatches(false);
     	elevator.zeroElevator();
     	gearToggle.reset();
+    	drive.resetLeftEncoder();
+    	drive.resetRightEncoder();
     }
     
     /**
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-    	drive.drive(1, 0, true);
+    	leftDistanceDriven = drive.getLeftEncoder();
+    	rightDistanceDriven = drive.getRightEncoder();
+    	if (leftDistanceDriven < AUTONOMOUS_DISTANCE && rightDistanceDriven < AUTONOMOUS_DISTANCE) {
+    		drive.drive(1, 0, true);
+    	}
     }
     
     /**
@@ -98,6 +110,8 @@ public class Robot extends IterativeRobot {
     public void teleopInit() {
     	elevator.zeroElevator();
     	gearToggle.reset();
+    	drive.resetLeftEncoder();
+    	drive.resetRightEncoder();
     }
 
     /**
