@@ -1,31 +1,27 @@
-//  .----------------.  .----------------.  .----------------.  .----------------.   .----------------.  .----------------.  .----------------.  .----------------. 
-// | .--------------. || .--------------. || .--------------. || .--------------. | | .--------------. || .--------------. || .--------------. || .--------------. |
-// | |  _________   | || |  _________   | || |      __      | || | ____    ____ | | | |    ______    | || |    ______    | || |    _____     | || |   _______    | |
-// | | |  _   _  |  | || | |_   ___  |  | || |     /  \     | || ||_   \  /   _|| | | |   / ____ `.  | || |  .' ____ '.  | || |   / ___ `.   | || |  |  _____|   | |
-// | | |_/ | | \_|  | || |   | |_  \_|  | || |    / /\ \    | || |  |   \/   |  | | | |   `'  __) |  | || |  | (____) |  | || |  |_/___) |   | || |  | |____     | |
-// | |     | |      | || |   |  _|  _   | || |   / ____ \   | || |  | |\  /| |  | | | |   _  |__ '.  | || |  '_.____. |  | || |   .'____.'   | || |  '_.____''.  | |
-// | |    _| |_     | || |  _| |___/ |  | || | _/ /    \ \_ | || | _| |_\/_| |_ | | | |  | \____) |  | || |  | \____| |  | || |  / /____     | || |  | \____) |  | |
-// | |   |_____|    | || | |_________|  | || ||____|  |____|| || ||_____||_____|| | | |   \______.'  | || |   \______,'  | || |  |_______|   | || |   \______.'  | |
-// | |              | || |              | || |              | || |              | | | |              | || |              | || |              | || |              | |
-// | '--------------' || '--------------' || '--------------' || '--------------' | | '--------------' || '--------------' || '--------------' || '--------------' |
-//  '----------------'  '----------------'  '----------------'  '----------------'   '----------------'  '----------------'  '----------------'  '----------------' 
+//         .----------------.  .----------------.  .----------------.  .----------------. 
+//        | .--------------. || .--------------. || .--------------. || .--------------. |
+//        | |    ______    | || |    ______    | || |    _____     | || |   _______    | |
+//        | |   / ____ `.  | || |  .' ____ '.  | || |   / ___ `.   | || |  |  _____|   | |
+//        | |   `'  __) |  | || |  | (____) |  | || |  |_/___) |   | || |  | |____     | |
+//        | |   _  |__ '.  | || |  '_.____. |  | || |   .'____.'   | || |  '_.____''.  | |
+//        | |  | \____) |  | || |  | \____| |  | || |  / /____     | || |  | \____) |  | |
+//        | |   \______.'  | || |   \______,'  | || |  |_______|   | || |   \______.'  | |
+//        | |              | || |              | || |              | || |              | |
+//        | '--------------' || '--------------' || '--------------' || '--------------' |
+//         '----------------'  '----------------'  '----------------'  '----------------' 
 //2015 FRC Robotics competition
 
 package org.usfirst.frc.team3925.robot;
 
 import static org.usfirst.frc.team3925.robot.RobotMap.CAMERA_IP;
 import static org.usfirst.frc.team3925.robot.RobotMap.DRIVE_LEFT_MOTOR;
-import static org.usfirst.frc.team3925.robot.RobotMap.LEFT_DRIVE_ENCODER_A;
-import static org.usfirst.frc.team3925.robot.RobotMap.LEFT_DRIVE_ENCODER_B;
-import static org.usfirst.frc.team3925.robot.RobotMap.RIGHT_DRIVE_ENCODER_A;
-import static org.usfirst.frc.team3925.robot.RobotMap.RIGHT_DRIVE_ENCODER_B;
 import static org.usfirst.frc.team3925.robot.RobotMap.DRIVE_RIGHT_MOTOR;
 import static org.usfirst.frc.team3925.robot.RobotMap.DRIVE_SOLENOID_A;
 import static org.usfirst.frc.team3925.robot.RobotMap.DRIVE_SOLENOID_B;
 import static org.usfirst.frc.team3925.robot.RobotMap.ELEVATOR_ENCODER_A;
 import static org.usfirst.frc.team3925.robot.RobotMap.ELEVATOR_ENCODER_B;
-import static org.usfirst.frc.team3925.robot.RobotMap.ELEVATOR_LEFT_VICTOR;
-import static org.usfirst.frc.team3925.robot.RobotMap.ELEVATOR_RIGHT_VICTOR;
+import static org.usfirst.frc.team3925.robot.RobotMap.ELEVATOR_LEFT_TALON;
+import static org.usfirst.frc.team3925.robot.RobotMap.ELEVATOR_RIGHT_TALON;
 import static org.usfirst.frc.team3925.robot.RobotMap.ELEVATOR_SWITCH;
 import static org.usfirst.frc.team3925.robot.RobotMap.INTAKE_ROLLER;
 import static org.usfirst.frc.team3925.robot.RobotMap.INTAKE_VICTOR_LEFT;
@@ -33,10 +29,22 @@ import static org.usfirst.frc.team3925.robot.RobotMap.INTAKE_VICTOR_RIGHT;
 import static org.usfirst.frc.team3925.robot.RobotMap.JOYSTICK_XBOX_DRIVER;
 import static org.usfirst.frc.team3925.robot.RobotMap.JOYSTICK_XBOX_SHOOTER;
 import static org.usfirst.frc.team3925.robot.RobotMap.LATCH_PORT;
+import static org.usfirst.frc.team3925.robot.RobotMap.LEFT_DRIVE_ENCODER_A;
+import static org.usfirst.frc.team3925.robot.RobotMap.LEFT_DRIVE_ENCODER_B;
 import static org.usfirst.frc.team3925.robot.RobotMap.PCM_CAN_ID;
+import static org.usfirst.frc.team3925.robot.RobotMap.RIGHT_DRIVE_ENCODER_A;
+import static org.usfirst.frc.team3925.robot.RobotMap.RIGHT_DRIVE_ENCODER_B;
+
+import com.ni.vision.NIVision;
+import com.ni.vision.NIVision.DrawMode;
+import com.ni.vision.NIVision.Image;
+import com.ni.vision.NIVision.ShapeMode;
+
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.vision.AxisCamera;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -51,7 +59,7 @@ public class Robot extends IterativeRobot {
 	
 	public static final double AUTONOMOUS_DISTANCE = 10;
 	
-	Camera camera;
+//	AxisCamera camera;
 	Drive drive;
 	Elevator elevator;
 	Intake intake;
@@ -61,36 +69,50 @@ public class Robot extends IterativeRobot {
 	Joystick driverXbox;
 	Joystick shooterXbox;
 	ToggleButton gearToggle;
+	ToggleButton manualElevatorToggle;
+	Button zeroElevatorBtn;
+	Button liftToteBtn;
+	Button lowerToteBtn;
 	
 	private final double DEADZONE = 0.1;
 	double leftDistanceDriven;
 	double rightDistanceDriven;
+	double leftSpeed;
+	double rightSpeed;
+	
+	Image frame;
 	
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
      */
     public void robotInit() {
-    	camera = new Camera(CAMERA_IP);
+    	frame = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_RGB, 0);
+    	
+//    	camera = new AxisCamera(CAMERA_IP);
     	drive = new Drive(DRIVE_LEFT_MOTOR, DRIVE_RIGHT_MOTOR, PCM_CAN_ID, DRIVE_SOLENOID_A, DRIVE_SOLENOID_B, LEFT_DRIVE_ENCODER_A, LEFT_DRIVE_ENCODER_B, RIGHT_DRIVE_ENCODER_A, RIGHT_DRIVE_ENCODER_B);
     	latches = new Latches(LATCH_PORT);
-    	elevator = new Elevator(ELEVATOR_LEFT_VICTOR, ELEVATOR_RIGHT_VICTOR, ELEVATOR_ENCODER_A, ELEVATOR_ENCODER_B, ELEVATOR_SWITCH, latches);
+    	elevator = new Elevator(ELEVATOR_LEFT_TALON, ELEVATOR_RIGHT_TALON, ELEVATOR_ENCODER_A, ELEVATOR_ENCODER_B, ELEVATOR_SWITCH, latches);
     	intake = new Intake(INTAKE_VICTOR_LEFT, INTAKE_VICTOR_RIGHT, INTAKE_ROLLER);
     	
     	shooterXbox = new Joystick(JOYSTICK_XBOX_SHOOTER);
     	driverXbox = new Joystick(JOYSTICK_XBOX_DRIVER);
     	gearToggle = new ToggleButton(driverXbox, 1);
+    	manualElevatorToggle = new ToggleButton(shooterXbox, 8 /* start */);
+    	zeroElevatorBtn = new Button(shooterXbox, 2);
+    	liftToteBtn = new Button(shooterXbox, 1);
+    	lowerToteBtn = new Button(shooterXbox, 4);
     	
     	leftDistanceDriven = 0;
     	rightDistanceDriven = 0;
     }
 
     public void autonomousInit() {
-    	latches.setLatches(false);
     	elevator.zeroElevator();
     	gearToggle.reset();
     	drive.resetLeftEncoder();
     	drive.resetRightEncoder();
+    	elevator.liftStack();
     }
     
     /**
@@ -99,17 +121,24 @@ public class Robot extends IterativeRobot {
     public void autonomousPeriodic() {
     	leftDistanceDriven = drive.getLeftEncoder();
     	rightDistanceDriven = drive.getRightEncoder();
-    	if (leftDistanceDriven < AUTONOMOUS_DISTANCE && rightDistanceDriven < AUTONOMOUS_DISTANCE) {
-    		drive.drive(1, 0, true);
-    	}
+    	leftSpeed = (AUTONOMOUS_DISTANCE - leftDistanceDriven) / 6;
+    	rightSpeed = (AUTONOMOUS_DISTANCE - rightDistanceDriven) / 6;
+//    	if (leftSpeed > 1)
+//    		leftSpeed = 1;
+//    	if (rightSpeed > 1) 
+//    		rightSpeed = 1;   Possibly don't need?
+    	drive.setMotorOutputs(leftSpeed, rightSpeed);
     }
     
     /**
      * This function is called at the beginning of teleop
      */
     public void teleopInit() {
-    	elevator.zeroElevator();
+    	//elevator.zeroElevator();
     	gearToggle.reset();
+    	manualElevatorToggle.reset();
+    	//elevator.liftStack();
+    	
     	drive.resetLeftEncoder();
     	drive.resetRightEncoder();
     }
@@ -123,33 +152,46 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("elevator height", elevator.getCurrentHeight());
     	elevatorPeriodic();
     	intakePeriodic();
+//    	cameraPeriodic(); disabled, camera commented out
     	
     }
+    
+    public void cameraPeriodic() {
+    	NIVision.Rect rect = new NIVision.Rect(10, 10, 100, 100);
+        if (isOperatorControl() && isEnabled()) {
 
+//            camera.getImage(frame);
+            NIVision.imaqDrawShapeOnImage(frame, frame, rect, DrawMode.DRAW_VALUE, ShapeMode.SHAPE_OVAL, 0.0f);
+
+            CameraServer.getInstance().setImage(frame);
+        }
+    }
+    
+	/**
+	 * Controls elevator based on user input
+	 */
 	private void elevatorPeriodic() {
-		//Setting the speed of the elevator
-		double elevatorSpeed = shooterXbox.getRawAxis(1);
-		if (shooterXbox.getRawButton(2) && wait > 30) {
-			elevator.zeroElevator();
-		}else if (elevatorSpeed != 0 && shooterXbox.getRawButton(3)) {
-	    	elevator.setElevatorSpeed(elevatorSpeed);
-		}else if (shooterXbox.getRawButton(1)) {
-			elevator.lowerStack();
-		}else if (shooterXbox.getRawButton(4)) {
-			elevator.liftStack();
-		}
-		/*
-		if (driverXbox.getRawButton(3) && wait > 30) {
-			elevator.liftStack();
-			wait = 0;
-		}
 		
-		if (driverXbox.getRawButton(4) && wait > 30) {
-			elevator.lowerStack();
-			wait = 0;
+		manualElevatorToggle.update();
+		
+		if (manualElevatorToggle.get()) {
+			elevator.idle();
+			
+			double elevatorSpeed = -shooterXbox.getRawAxis(1);
+			elevator.setElevatorSpeed(elevatorSpeed, true);
+		} else {
+			if (lowerToteBtn.get()) {
+				elevator.lowerStack();
+			}
+			if (liftToteBtn.get()) {
+				elevator.liftStack();
+			}
+			if (zeroElevatorBtn.get()) {
+				SmartDashboard.putBoolean("zero'd", true);
+				elevator.zeroElevator();
+			}
+			elevator.elevatorRun();
 		}
-		elevator.elevatorRun();*/
-		wait++;
 	}
 	
 	private void intakePeriodic() {
@@ -176,5 +218,4 @@ public class Robot extends IterativeRobot {
     public void disabledInit() {
     	drive.drive(0, 0, gearToggle.get());
     }
-    
 }
